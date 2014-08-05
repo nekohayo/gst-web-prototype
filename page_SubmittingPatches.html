@@ -1,0 +1,59 @@
+<title>GStreamer: Submitting Patches</title>
+
+<h1>Best Practices for Submitting Patches</h1>
+
+<h2>Where</h2>
+<p>Please submit patches for GStreamer in <a href="https://bugzilla.gnome.org/">GNOME bugzilla</a>:<ul><li>you will need to create a GNOME bugzilla account if you don't have one yet (yep, that's just how it is, sorry for the inconvenience)</li>
+    <li>create a new bug if there is no bug report for this issue yet; <a href="http://gstreamer.freedesktop.org/bugs/">This page</a> has shortcuts for the major components</li>
+    <li>once you have created a bug you can attach your patch(es), see below for more details</li>
+    <li>if your patch is an enhancement or new API, please set your bug's severity to 'enhancement'</li>
+    <li>if your patch is against a specific plugin or element, prefix the Summary with <tt>[element-name]</tt> or <tt>[plugin-name]</tt> and keep the rest of the description as short and precise as possible. Example: <em>[id3demux] add support for WCOP frame</em>. This makes sure developers looking through the <a href="http://bugzilla.gnome.org/buglist.cgi?product=GStreamer&amp;bug_status=UNCONFIRMED&amp;bug_status=NEW&amp;bug_status=ASSIGNED&amp;bug_status=NEEDINFO&amp;bug_status=REOPENED&amp;form_name=query">list of open bugs</a> can quickly identify what your bug is about; if your text is too long and only contains fill words at the beginning, the important information will be cut off and not show up in the list view.</li>
+    <li>create separate bugs for separate issues</li>
+</ul>
+<p>Please do not submit patches on the gstreamer-devel mailing list. Patches submitted on the mailing list are most likely going to be ignored or simply overlooked.</p>
+<p>Please also do not attach patches to already-existing bugs unless they are directly relevant to the issue, ie. do not attach patches to already-existing bugs that are only vaguely related to your issue.</p>
+
+
+<h2>How</h2>
+<p>You should prepare patches against a current git checkout, if possible at all. Patches against the current stable release of the module in question <em>may</em> be acceptable as well if the plugin/code hasn't changed much since then, but if it has, chances are that you will be asked to provide an updated patch against the git repository.</p>
+<p>If you have created a new plugin, please submit a patch that adds it to gst-plugins-bad (including configure.ac and the various Makefile.am modifications and all new files).
+</p>
+<h3>General information on how we like our patches</h3>
+<p>Please always submit patches in 'unified context' format to make sure they are human-readable. This is the default if you are using 'git diff' or 'git format-patch' to create a patch.  Otherwise, you can achieve this by passing the '-u' option to diff. Additionally, it would be quite helpful if you could also pass the '-p' option, which adds useful information to each individual patch chunk (such as the C function name). This makes patches much easier to review.</p>
+<p>Please make sure your patches are as terse and precise as possible. Do not include 'clean-ups' or non-functional changes, since they distract from the real changes and make things harder to review (if you feel there are things to clean-up, please submit the clean-ups as a separate patch that does not contain any functional changes).</p>
+<p>Try to stick to the GStreamer coding style (run <a href="http://webcvs.freedesktop.org/gstreamer/gstreamer/tools/gst-indent?view=markup">gst-indent</a> over your .c or .cpp files, but not the header files, if you want your code auto-indented before making the patch).</p>
+<p>Please do not include a <a href="http://gstreamer.freedesktop.org/wiki/ChangeLog">ChangeLog</a> entry with your patch (feel free to suggest a wording for the <a href="http://gstreamer.freedesktop.org/wiki/ChangeLog">ChangeLog</a> entry in the bug report though).</p>
+<h3>Creating a diff of a single file from local changes</h3>
+<pre>$ git diff path/to/file.c &gt; mypatch.diff</pre>
+<p>or, if you are not working within a git repository (you should!):</p>
+<pre>$ diff -u -p gst-plugins-foo-0.10.n-original/path/to/file.c gst-plugins-foo-0.10.n-modified/path/to/file.c &gt; mypatch.diff</pre>
+
+
+
+<h3>Creating a diff of multiple files or a whole directory</h3>
+<pre>$ git diff gst/foodemux/file1.c gst/foodemux/file1.h &gt; foodemuxpatch.diff</pre>
+<p>If you specify a directory, 'git diff' will create a patch for all modified files in the directory and all sub-directories:</p>
+<pre>$ git diff gst/foodemux/ &gt; foodemuxpatch.diff</pre>
+<p>The same goes for diff (note the -r option):</p>
+<pre>$ diff -u -p -r gst-plugins-foo-0.10.n-original/gst/foodemux/ gst-plugins-foo-0.10.n-modified/gst/foodemux/ &gt; mypatch.diff</pre>
+
+
+<h3>Create a diff from a git commit</h3>
+<p>Working with a git repository is generally easier if you commit your changes locally.  Unlike CVS, where commiting your changes is synonymous with sending those changes to the central repository, git has a two-stage commit process: commit the changes locally, then separately push those changes to a central repository.  This allows developers to have the benefits of change control without needing write access to the central repository.</p>
+<p>To commit changes locally, use the 'git add' and 'git commit' commands.  You can add several times on various files, and then commit them all together.  For example:</p>
+<pre>$ git add file1.c
+$ git add file2.c file3.h
+$ git commit</pre>
+<p>The commit command will allow you to write a commit message.  GStreamer developers generally use 'pluginname: short description of changes', a blank line, and then potentially several lines of detailed information about the changes.</p>
+<p>To modify a commit, including adding new files, you can use 'git commit --amend'.</p>
+<p>Once you have committed changes, and want to pull new changes from the central GStreamer repository, use 'git pull --rebase'.  The '--rebase' option causes git to replay your changes on top of any changes that you pull from the central repository.</p>
+<p>To create a nicely formatted patch from the most recent commit, use:</p>
+<pre>$ git format-patch -n1</pre>
+<p>Attaching a patch that is in this form to a bugzilla bug makes applying and merging the patch much easier for another developers that reviews your patch.</p>
+<p>If you haven't used git before, it would be a good idea to tell it who you are:</p>
+<pre>$ git config --global user.name "George S. Treamer"
+$ git config --global user.email "gstreamer@gmail.com"</pre>
+
+
+<h2>What to do after you have submitted your patch</h2>
+<p>Most of all, please be patient.  We try to review patches as quickly as possible, but there is such a high turnaround of bugs, patches and feature requests that it is not always possible to tend to them all as quickly as we'd like. This is especially true for completely new plugins. If you haven't gotten any response at all for a while, feel free to 'ping' us by posting a quick follow-up comment to the bug or finding us on IRC (many developers actively track changes in bugzilla via e-mail, so a follow-up comment will usually be noticed).</p>

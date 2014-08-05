@@ -1,0 +1,56 @@
+<title>GStreamer: Contributing</title>
+
+<h1>Welcome, developers!</h1>
+
+<p>If you are not already familiar with how the GStreamer library works, take a look at our wonderful <a href="/documentation/">Documentation page</a>. We suggest to read the manual and the "introductory slides" to get a good general overview.</p>
+                                                                                
+<p>We would be happy to help you started. You are welcome to:</p>
+<ul>
+    <li>Contribute to the core library.</li>
+    <li>Write plugins for GStreamer.</li>
+    <li>Write applications using GStreamer.</li>
+    <!-- FIXME: is this actually relevant with gobject introspection? <li>Write a lot of <a href="/bindings/">language bindings</a>.</li>-->
+    <li>Contribute to the documentation.</li>
+    <li>Build test cases.</li>
+</ul>
+
+<p>The developers tend to live in the "#gstreamer" IRC channel on <a href="http://www.freenode.net/">Freenode</a>. More details and options for getting in touch can be seen on the <a href="/contact">contact</a> page.
+<!-- Sketching ideas and making plans can be done on the <a href="http://gstreamer.freedesktop.org/wiki">gstreamer wiki</a>. -->
+</p>
+
+<p>Of course, <b>testers are welcome too!</b> See the <a href="/bugs">bugs</a> page for details.</p>
+
+<section class="auto-column-half">
+<h2>Anonymous Git access</h2>
+
+<p>The repository is split in several <a href="/modules/">modules</a>.</p>
+
+<p>Those modules can be checked out through Git with the following instruction set. Replace "★" by the name of the module you wish to checkout. To determine the names of the modules created by this project, you may examine their Git repository via the <a href="&gst-repo-http;">provided web-based Git repository viewer</a>.</p>
+<p>
+<code>
+git clone git://anongit.freedesktop.org/gstreamer/★
+</code>
+</p>
+</section>
+
+<section class="auto-column-half">
+<h2>Frequent contributor Git access</h2>
+<p>Core project developers, needing to review/merge/push changes on a frequent basis, can access the Git tree via this method:</p>
+<code>
+git clone ssh://<i>user</i>@git.freedesktop.org/git/gstreamer/★
+</code>
+
+<p>Typically, you should only apply for a developer account if you have been encouraged by a GStreamer developer to do so, or have been contributing to GStreamer and been active in the GStreamer community for some time.</p>
+
+<p>Indeed, you do not need a developer account in order to work on GStreamer. Since Git is a decentralized system, anonymous git access is usually sufficient as it's easy to maintain personal git branches elsewhere with git (e.g. on a personal server, or gitorious or github). Patches can and should then be submitted via bugzilla, as per the <a href="/?go=SubmittingPatches">Submitting Patches</a> page.</p>
+
+<p>You can find information on how to get a developer account <a href="http://www.freedesktop.org/wiki/AccountRequests">here</a>. Developers will be added to the project for write access as necessary. For all other changes, please submit patches (in <code>git format-patch</code> format) to <a href="http://bugzilla.gnome.org/enter_bug.cgi?product=GStreamer">bugzilla</a>. File a new bug and then attach the patch to the bug.</p>
+</section>
+
+
+<h2>Developer Guidelines</h2>
+<p>Best practices for making patches and/or committing to GStreamer git can be found on the <a href="/?go=DeveloperGuidelines">Developer Guidelines</a> page.</p>
+
+
+<h2>Buildbot and automated media integration tests</h2>
+<p>Commits to Git are verified by our build and testing system. This does automated checkouts, runs the build and the various test suites, including media file tests. If a commit breaks a build, it is announced in the <a href="irc://irc.freenode.net/gstreamer">gstreamer developer channel</a> and easily visible on the <a href="http://ci.gstreamer.net">GStreamer Jenkins instance</a>'s web interface. This allows us to quickly catch any regressions.</p>

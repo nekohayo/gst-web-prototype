@@ -1,0 +1,10 @@
+RewriteEngine On
+
+RewriteRule ^tour$ index.php?go=tour [NC,L]
+RewriteRule ^download$ index.php?go=download [NC,L]
+RewriteRule ^documentation$ index.php?go=documentation [NC,L]
+RewriteRule ^bugs$ index.php?go=bugs [NC,L]
+RewriteRule ^contributing$ index.php?go=contributing [NC,L]
+RewriteRule ^contact$ index.php?go=contact [NC,L]
+
+RewriteRule ^(.*)\.html index.php?go=$1 [NC]

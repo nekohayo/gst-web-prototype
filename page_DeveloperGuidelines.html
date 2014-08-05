@@ -1,0 +1,170 @@
+<title>GStreamer: Developer Guidelines</title>
+
+<h1>Guidelines for GStreamer developers</h1>
+<p><strong>Best practices and git use guidelines for GStreamer developers and contributors</strong></p>
+<p><em>This document is a draft and by no means complete. If in doubt, ask in the IRC channel.</em> </p>
+
+
+<h2>Committing</h2>
+<ul>
+    <li>make sure you have registered your full name and e-mail address for git on the machine you're committing from (see below)</li>
+    <li>don't commit merges, always rebase (if you look at the graph in gitk or giggle, it should be a straight line from the current HEAD of master to origin/master)
+        <ul>
+        <li>The one exception to this if for surgery/brown-paperbag releases which require creating a separate branch for the release, but then has to be merged back.</li>
+        </ul></li>
+    <li>commit messages: <ul>
+    <li>please take the time to write good and concise commit messages</li>
+    <li>if you don't, people may make fun of you in public</li>
+    <li>the first line of the commit message should be a short and concise summary of the commit. If it applies only to a specific subsystem or plugin, prefix the message with the subsystem, e.g.: <tt>oggdemux: fix granulepos query for the old theora bitstream</tt>. This should be a *summary* of the change and not a description of the change, ie. don't say how you did something, but what you fixed/improved/changed, ie. what the most important practical effect of the change is. Example: <tt>qtdemux: fix crash when doing reverse playback in push mode</tt> (good), not <tt>qtdemux: use signed integer to avoid counter underrun</tt> (bad)</li>
+    <li>the second line should be empty</li>
+    <li>the third and following lines should contain an extensive *description* and *rationale* of the change made: what was changed, what was broken, how did it get fixed, what bugs or issues does this fix? And most importantly: *why* was something changed. Trivial commits do not require a description. The important part is really what the reasoning behind the change is, since that's what people want to know if they try to figure out twelve months later why a line of code does what it does.</li>
+    <li>bug numbers or links should always go into the description, not into the summary line (if there is no description block, make one)</li>
+    <li>add a <tt>Based on patch by: John Bleh &lt;john@bleh.com&gt;'</tt> to the end of the commit message if the patch is based partly on someone else's work but you are not going to use <tt>git commit --author</tt> for this patch.</li></ul></li>
+    <li>don't commit things that aren't relevant to your change, such as modified .po files, win32/common/config.h etc. <ul>
+    <li>you can revert locally modified files to the version in git with <tt>git checkout files</tt>, e.g. <tt>git checkout po/*po</tt></li></ul></li>
+    <li>don't commit multiple unrelated changes in one go, commit them separately (use your judgement; if in doubt, do separate commits)</li>
+    <li>use <tt>git commit --author='John Bleh &lt;john@bleh.com&gt;' files</tt> to commit someone else's patch.</li>
+    <li>make sure not to accidentally change the version of the common submodule used when you commit things; if <tt>git diff</tt> shows that common changed, run <tt>git submodule update</tt> or <tt>git reset common</tt> to fix it. In general, try to avoid using <tt>commit -a</tt>, but instead explicitly do <tt>git add &lt;files you want to commit&gt;; git commit</tt> or just <tt>git commit &lt;files or directories you want to commit&gt;</tt>.</li>
+    <li>don't use <tt>git commit -a</tt>, better <tt>git add foo/bar.[ch]</tt> changes individually, then <tt>git commit</tt> when <tt>git status</tt> looks ok.</li>
+</ul>
+
+
+<h2>Remote branches</h2>
+<ul>
+    <li>don't push your own work branches to the main gstreamer repository; you can create a personal repository on people.freedesktop.org and push your personal branches there: <a href="http://www.freedesktop.org/wiki/Infrastructure/git/RepositoryAdmin">Instructions for creating a personal git repository on people.freedesktop.org</a></li></ul>
+
+
+<h2>Merging branches</h2>
+<p>Avoid 'merge commits' by rebasing your branch to master before merging it into master:</p>
+
+<p>
+<pre>git checkout branch
+git rebase master
+git checkout master
+git merge branch</pre>
+</p>
+
+<p>...or doing git rebase origin/master on master after merging - this should get rid of any merge commits:</p>
+
+<p>
+<pre>checkout master
+merge branch
+rebase origin/master</pre>
+</p>
+
+<p>You might also want to use <tt>git pull --rebase</tt> instead of <tt>git pull</tt> when you update.</p>
+
+
+
+<h2>Pushing changes</h2>
+<ul>
+    <li>do review the commits you are about to push to the public repository in gitk or giggle or the like</li>
+    <li>make sure your name and e-mail is set correct on all the commits (no local host names in e-mail address etc.)</li>
+    <li>make sure the author is set correctly for all commits where you applied someone else's patch</li>
+    <li>before pushing, make sure the module in question isn't frozen due to release being prepared. You are expected to check the #gstreamer IRC channel topic and the mailing list for this. If you haven't checked, don't push. Check the <a href="wiki/ReleasePlanning">ReleasePlanning</a> page for when to expect releases.</li>
+    <li>do <strong>NOT</strong> push work branches to the official repositories, use a personal repository if you want them stored somewhere visible (see Personal repositories below)</li></ul>
+
+<h2>Committing changes that deprecate API</h2>
+<p>see <a href="wiki//DeprecatingAPI">DeprecatingAPI</a> for details</p>
+
+
+
+<h2>Adding new API</h2>
+<p>New API covers things such as:
+<ul>
+    <li>new exported functions which are added to an installed header file (mostly core, -base and -gl libraries)</li>
+    <li>new enums or flags in installed header files (mostly core, -base and -gl libraries)</li>
+    <li>new GObject properties on core library or plugins library objects, or elements in -base, -good or -ugly</li>
+    <li>new structure members in installed header files (mostly core, -base and -gl libraries; plugin/element headers are usually not installed, so you can change those as much as you like)</li>
+    <li>new plugins/elements being added to GStreamer core, -base, -good, or -ugly</li>
+    <li>basically most things which we can't easily change without breaking things once they've been in a release</li>
+</ul>
+</p>
+<p>Generally, new API should be reviewed before being committed, especially new core or core/-base libs API (in practice you'll find that there is a bit of a gray area here and the rule does not always apply to module maintainers or lead developers).</p>
+<p>Getting your new API reviewed is best done by filing an enhancement bug against the module in question and attaching a patch which adds the new API and includes a gtk-doc blurb (don't forget the 'Since: 0.10.x' at the end of the gtk-doc blurb and adding your new function to the appropriate -sections.txt file in the docs/ directory). Mark the bug summary with the <tt>[API]</tt> keyword for extra attention. Then either wait until you get feedback, or poke people on IRC to have a look at it. If you don't get feedback, keep poking. Don't assume it's ok to commit/push new API just because no one raised any objections.</p>
+<p>Some simple unit tests for the new API are always a good thing too.</p>
+
+
+<h4>Adding properties</h4>
+<p>If you're adding new properties, please add a gtk-doc chunk with a 'Since:' tag for the property, e.g.
+<pre>  /**
+   * GstPipeline:delay
+   *
+   * The expected delay needed for elements to spin up to the
+   * PLAYING state expressed in nanoseconds.
+   * see gst_pipeline_set_delay() for more information on this option.
+   *
+   * Since: 0.10.5
+   **/
+  g_object_class_install_property (gobject_class, PROP_DELAY,
+      g_param_spec_uint64 ("delay", "Delay",
+          "Expected delay needed for elements "
+          "to spin up to PLAYING in nanoseconds", 0, G_MAXUINT64, DEFAULT_DELAY,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));</pre>
+</p>
+
+
+<h4>Committing new API</h4>
+<p>Use the 'API:' keyword in the body of the commit message when adding new API (ie. exported functions, GObject vfuncs, GObject properties or GObject signals), e.g.: <pre>Add API to intercept flow returns.
+
+...extensive description...
+
+API: gst_pad_add_flow_probe()</pre>
+ or <pre>fakesrc: add format property to control the format of the newsegment events.
+
+API: GstFakeSrc:format</pre>
+<p>(There is not exact format for this stuff, just make sure to use the keyword to make life easier for the release manager)</p>
+
+
+<h2>Tools</h2>
+<ul>
+    <li>git</li>
+    <li><a href="http://blog.fishsoup.net/2008/11/16/git-bz-bugzilla-subcommand-for-git/">git-bz</a>: bugzilla subcommand for git</li>
+    <li><a href="http://live.gnome.org/giggle">giggle</a>: A gtk-based git viewer. A must-have to have a better grasp at what is going on in git.</li></ul>
+<p>We don't maintain a <tt>ChangeLog</tt> file in git any longer, but auto-generate it upon release from the git commit messages. Therefore it is no longer necessary to use tools like <tt>moap</tt>, <tt>prepare-ChangeLog.pl</tt> or <tt>cicl</tt></p>
+
+
+<h4>setting up your name and e-mail address</h4>
+<p>
+<pre>$ git config --global user.name "FirstName LastName"
+$ git config --global user.email "user@example.com"</pre>
+</p>
+<p>See the <a href="http://www.sourcemage.org/Git_Guide">Git Guide</a> for more setup options (colours etc.)</p>
+
+
+<h2>Personal repositories</h2>
+<p>Explanations available here for creating a personal repository on freedesktop.org (if you have an account there) : <a href="http://www.freedesktop.org/wiki/Infrastructure/git/RepositoryAdmin">http://www.freedesktop.org/wiki/Infrastructure/git/RepositoryAdmin</a></p>
+
+<p>There are many other git hosting facilities out there if you don't have a freedesktop.org account (github.org and gitorious.org for example).</p>
+<p>Once you have created a personal repository, you can locally add that repository to the list of remote repositories your local checkout is tracking (let's say we created a personal repo for storing our work branches for work on gstreamer core):
+<pre>$ me@local&gt; cd gstreamer.git
+$ me@local&gt; git remote add myrepo ssh://people.freedesktop.org/~username/gstreamer</pre>
+
+<p>If you have a local work branch (called 'mywork') you can now push it to your personal repository <pre>$ me@local&gt; git push myrepo mywork:mywork</pre>
+</p>
+
+
+<h2>Updating the common submodule</h2>
+<ul>
+    <li>by default the common submodule is checkout out from anonymous git, which makes it fiddlier to push changes directly from there.</li>
+    <li>best to get a dedicated common checkout and push changes from that (after testing in the proper modules)</li>
+    <li>then run common/update-common to make all modules use your latest common changes</li>
+    <li>alternatively, if just one single module needs updating for now, run 
+<pre>cd common/
+git fetch origin
+git checkout origin/master
+cd ..
+git status
+git commit -m "Update common submodule for $REASON" common</pre>
+    </li></ul>
+
+<h2>Random notes</h2>
+<ul>
+    <li>don't <tt>#include &lt;stdint.h&gt;</tt>, use <tt>#include "_stdint.h"</tt> or <tt>#include &lt;_stdint.h&gt;</tt></li>
+    <li>in Makefile.am, the order of the various CFLAGS and LIBS arguments matters, e.g. it should be <tt>$(GST_PLUGINS_BASE_CFLAGS) $(GST_CFLAGS) $(LIBFOO_CFLAGS)</tt></li></ul>
+
+
+<h2>Also see</h2>
+<ul>
+    <li><a href="wiki/GitResources">GitResources</a>: random collection of git-related documentation, tutorials, screencasts and cheat sheets</li>
+</ul>
